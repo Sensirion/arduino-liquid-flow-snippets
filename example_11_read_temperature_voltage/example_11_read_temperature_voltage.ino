@@ -55,9 +55,6 @@ const float MEASUREMENT_FACTOR[] = {SCALEFACTOR_FLOW,
 const char *MEASUREMENT_TYPE[] = {"Flow (signed value)", "Temp", "VDD"};
 const char *MEASUREMENT_UNIT[] = {""," C"," Volt"};
 
-uint16_t user_reg_lin;
-uint16_t user_reg_raw;
-
 // -----------------------------------------------------------------------------
 // Arduino setup routine, just runs once:
 // -----------------------------------------------------------------------------
@@ -80,31 +77,6 @@ void setup() {
       continue;
     }
     delay(50); // wait long enough for reset
-
-    // Read the user register to get the active configuration field
-    Wire.beginTransmission(ADDRESS);
-    Wire.write(0xE3);
-    ret = Wire.endTransmission();
-    if (ret != 0) {
-      Serial.println("Error while setting register read mode");
-      continue;
-    }
-
-    Wire.requestFrom(ADDRESS, 2);
-    user_reg  = Wire.read() << 8;
-    user_reg |= Wire.read();
-    ret = Wire.endTransmission();
-    if (ret != 0) {
-      Serial.println("Error while reading register settings");
-      continue;
-    }
-
-    // The liearization needs to be turned off for TEMP and VDD measurement with
-    // liquid flow sensors, this is controlled by bit 9:
-    //        0: off
-    //        1: on
-    user_reg_raw = (user_reg & 0xFDFF) | 0x0000;
-    user_reg_lin = (user_reg & 0xFDFF) | 0x0200;
   } while (ret != 0);
 }
 
@@ -120,17 +92,6 @@ void loop() {
 
   // Loop through the measurement of flow, temperature and VDD
   for (i = 0; i <= 2; ++i) {
-    reg = (i == 0 ? user_reg_lin : user_reg_raw);
-
-    Wire.beginTransmission(ADDRESS);
-    Wire.write(0xE2);                  // Send command
-    Wire.write((byte)(reg >> 8));      // Send MSB
-    Wire.write((byte)(reg & 0x00FF));  // Send LSB
-    ret = Wire.endTransmission();
-    if (ret != 0) {
-      Serial.println("Error during write register settings");
-      continue;
-    }
 
     Wire.beginTransmission(ADDRESS);
     Wire.write(TRIGGER[i]);
@@ -149,7 +110,7 @@ void loop() {
       continue;
     }
 
-    sensor_reading = ((int16_t)raw_sensor_value) / MEASUREMENT_FACTOR[i];
+    sensor_reading = ((int16_t) raw_sensor_value) / MEASUREMENT_FACTOR[i];
 
     Serial.print(MEASUREMENT_TYPE[i]);
     Serial.print(" Measurement: ");

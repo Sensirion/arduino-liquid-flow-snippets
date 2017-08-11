@@ -29,12 +29,12 @@
  */
 
 /*******************************************************************************
-# Purpose:  Based on Example code for the I2C communication with Sensirion
-#           Liquid Flow Sensors
-#
-#           Reads the scale factor and measurement unit information from the
-#           sensor's EEPROM and displays it on a character LCD
-*******************************************************************************/
+ * Purpose: Based on Example code for the I2C communication with Sensirion
+ *          Liquid Flow Sensors
+ *
+ *          Reads the scale factor and measurement unit information from the
+ *          sensor's EEPROM and displays it on a character LCD
+ ******************************************************************************/
 
 // adding the necessary LCD Code
 // first add the lCD library
@@ -43,42 +43,33 @@
 // then initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-
 #include <Wire.h>
 
 const int ADDRESS = 0x40; // Standard address for Liquid Flow Sensors
 
 const bool VERBOSE_OUTPUT = true; // set to false for less verbose output
 
-const uint16_t ACTIVE_CONFIG_FIELD_SIZE = 0x300;
-const uint16_t WRDADR_OFFSET_SCALEFACTOR = 0x02B6;
+// EEPROM Addresses for factor and unit of calibration fields 0,1,2,3,4.
+const uint16_t SCALE_FACTOR_ADDRESSES[] = {0x2B6, 0x5B6, 0x8B6, 0xBB6, 0xEB6};
+const uint16_t UNIT_ADDRESSES[] =         {0x2B7, 0x5B7, 0x8B7, 0xBB7, 0xEB6};
 
-const char *DIMENSIONS[] = {"X","X","X","n","u","m","c","d",
-                            "","-","h","k","M","G","", ""} ;
-const char *UNITS[] = {"nl","sl","sl@15C","sl@25C","X","X","X","X","l","g",
-                       "X","X","X","X","X","X","Pa","bar","m H2O","in H2O"};
-const char *TIME_BASES[] = {"-","us","ms","s","Min","h","day",
-                            "","","","","","","","",""};
+// Flow Units and their respective codes.
+const char    *FLOW_UNIT[] = {"nl/min", "ul/min", "ml/min", "ul/sec", "ml/h"};
+const uint16_t FLOW_UNIT_CODES[] = {2115, 2116, 2117, 2100, 2133};
 
-const char *dimension;
+uint16_t scale_factor;
 const char *unit;
-const char *time_base;
-uint16_t raw_scale_factor;
 
 // -----------------------------------------------------------------------------
 // Arduino setup routine, just runs once:
 // -----------------------------------------------------------------------------
 void setup() {
   int ret;
-  uint16_t user_reg;
-  uint16_t active_config_field;
-  uint16_t active_config_field_address;
-  uint16_t base_address;
 
-  uint16_t measurement_unit_code;
-  uint16_t dimension_code;
+  uint16_t user_reg;
+  uint16_t scale_factor_address;
+
   uint16_t unit_code;
-  uint16_t time_base_code;
 
   byte crc1;
   byte crc2;
@@ -99,7 +90,6 @@ void setup() {
     }
     delay(50); // wait long enough for reset
 
-    // Read scale factor and measurement unit
     // Read the user register to get the active configuration field
     Wire.beginTransmission(ADDRESS);
     Wire.write(0xE3);
@@ -118,65 +108,67 @@ void setup() {
       continue;
     }
 
-    // To determine the base EEPROM address for actual sensor information,
-    // bit <6:4> of User Register (called active configuration field) must be
-    // multiplied by the field size ACTIVE_CONFIG_FIELD_SIZE
-    active_config_field = ((user_reg & 0x0070) >> 4);
-    base_address = active_config_field * ACTIVE_CONFIG_FIELD_SIZE;
-    active_config_field_address = WRDADR_OFFSET_SCALEFACTOR + base_address;
+    // The active configuration field is determined by bit <6:4>
+    // of the User Register
+    scale_factor_address = SCALE_FACTOR_ADDRESSES[((user_reg & 0x0070) >> 4)];
 
+    // Read scale factor and measurement unit
     Wire.beginTransmission(ADDRESS);
     Wire.write(0xFA); // Set EEPROM read mode
     // Write left aligned 12 bit EEPROM address
-    Wire.write(active_config_field_address >> 4);
-    Wire.write((active_config_field_address << 12) >> 8);
+    Wire.write(scale_factor_address >> 4);
+    Wire.write((scale_factor_address << 12) >> 8);
     ret = Wire.endTransmission();
     if (ret != 0) {
       Serial.println("Error during write EEPROM address");
       continue;
     }
 
+    // Read the scale factor and the adjacent unit
     Wire.requestFrom(ADDRESS, 6);
-    raw_scale_factor       = Wire.read() << 8;
-    raw_scale_factor      |= Wire.read();
-    crc1                   = Wire.read();
-    measurement_unit_code  = Wire.read() << 8;
-    measurement_unit_code |= Wire.read();
-    crc2                   = Wire.read();
+    scale_factor = Wire.read() << 8;
+    scale_factor|= Wire.read();
+    crc1         = Wire.read();
+    unit_code    = Wire.read() << 8;
+    unit_code   |= Wire.read();
+    crc2         = Wire.read();
     ret = Wire.endTransmission();
     if (ret != 0) {
       Serial.println("Error while reading EEPROM");
       continue;
     }
 
-    dimension_code = (measurement_unit_code & 0x000F);
-    time_base_code = (measurement_unit_code & 0x00F0) >> 4;
-    unit_code      = (measurement_unit_code & 0x1F00) >> 8;
-
-    dimension      = DIMENSIONS[dimension_code];
-    unit           = UNITS[unit_code];
-    time_base      = TIME_BASES[time_base_code];
+    switch (unit_code) {
+     case 2115:
+       { unit = FLOW_UNIT[0]; }
+       break;
+     case 2116:
+       { unit = FLOW_UNIT[1]; }
+       break;
+     case 2117:
+       { unit = FLOW_UNIT[2]; }
+       break;
+     case 2100:
+       { unit = FLOW_UNIT[3]; }
+       break;
+     case 2133:
+       { unit = FLOW_UNIT[4]; }
+       break;
+     default:
+       Serial.println("Error: No matching unit code");
+       break;
+   }
 
     if (VERBOSE_OUTPUT) {
       Serial.println();
-      Serial.println("----------------");
-      Serial.print("Scale factor:           ");
-      Serial.println(raw_scale_factor);
-      Serial.print("Measurement unit code:  ");
-      Serial.println(measurement_unit_code);
-      Serial.print("Dimension:    ");
-      Serial.print(dimension);
-      Serial.print("  code:  ");
-      Serial.println(dimension_code);
-      Serial.print("Unit:         ");
+      Serial.println("-----------------------");
+      Serial.print("Scale factor: ");
+      Serial.println(scale_factor);
+      Serial.print("Unit: ");
       Serial.print(unit);
-      Serial.print("  code:  ");
+      Serial.print(", code: ");
       Serial.println(unit_code);
-      Serial.print("Time base:    ");
-      Serial.print(time_base);
-      Serial.print(" code: ");
-      Serial.println(time_base_code);
-      Serial.println("----------------");
+      Serial.println("-----------------------");
       Serial.println();
     }
 
@@ -188,6 +180,7 @@ void setup() {
       Serial.println("Error during write measurement mode command");
     }
   } while (ret != 0);
+
 
   //setup the LCD, a 16x2 (columnsxrows) in the case of the arduino starter kit
   lcd.begin(16, 2);
@@ -209,35 +202,27 @@ void loop() {
   raw_sensor_value |= Wire.read();      // read the LSB from the sensor
   ret = Wire.endTransmission();
   if (ret != 0) {
-    Serial.println("Error while reading flow measurement");
+        Serial.println("Error while reading flow measurement");
     // Display error on the LCD
     // move the LCD cursor to the second row
     lcd.setCursor(0, 1);
     lcd.print("Error reading flow");
 
   } else {
-    sensor_reading = ((int16_t) raw_sensor_value) / (float)raw_scale_factor;
+    sensor_reading = ((int16_t) raw_sensor_value) / ((float) scale_factor);
 
     Serial.print("Sensor reading: ");
     Serial.print(sensor_reading);
     Serial.print(" ");
-    Serial.print(dimension);
-    Serial.print(unit);
-    Serial.print("/");
-    Serial.println(time_base); 
+    Serial.println(unit);
 
-    // Displaying flow on the LCD
+     // Displaying flow on the LCD
     // move the LCD cursor to the second row
     lcd.setCursor(0, 1);
     lcd.print(sensor_reading);
     lcd.print(" ");
-    lcd.print(dimension);
     lcd.print(unit);
-    lcd.print("/");
-    lcd.print(time_base);
-    lcd.print("      "); // clear out the rest of the line
   }
 
-  delay(250);
+  delay(250); // milliseconds delay between reads (for demo purposes)
 }
-

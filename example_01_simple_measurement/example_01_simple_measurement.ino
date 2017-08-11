@@ -66,8 +66,8 @@ void setup() {
 // -----------------------------------------------------------------------------
 void loop() {
   int ret;
-  uint16_t rawSensorValue;
-  int16_t signedSensorValue;
+  uint16_t raw_sensor_value;
+  int16_t signed_sensor_value;
 
   // To perform a measurement, first send 0xF1 to switch to measurement mode,
   // then read 2 bytes + 1 CRC byte from the sensor.
@@ -79,19 +79,19 @@ void loop() {
 
   } else {
     Wire.requestFrom(ADDRESS, 2);       // reading 2 bytes ignores the CRC byte
-    rawSensorValue  = Wire.read() << 8; // read the MSB from the sensor
-    rawSensorValue |= Wire.read();      // read the LSB from the sensor
+    raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
+    raw_sensor_value |= Wire.read();      // read the LSB from the sensor
     ret = Wire.endTransmission();
     if (ret != 0) {
       Serial.println("Error while reading flow measurement");
     } else {
 
-      Serial.print("Raw value from Sensor: ");
-      Serial.print(rawSensorValue);
+      Serial.print("raw value from sensor: ");
+      Serial.print(raw_sensor_value);
 
-      signedSensorValue = (int16_t) rawSensorValue;
+      signed_sensor_value = (int16_t) raw_sensor_value;
       Serial.print(", signed value: ");
-      Serial.println(signedSensorValue);
+      Serial.println(signed_sensor_value);
     }
   }
 

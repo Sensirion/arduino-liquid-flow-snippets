@@ -148,9 +148,6 @@ void loop() {
       }
     }
 
-    // Record the time before the measurement
-    start_time = micros();
-
     // Switch to measurement mode
     Wire.beginTransmission(ADDRESS);
     Wire.write(0xF1);
@@ -159,9 +156,13 @@ void loop() {
       Serial.println("Error during write measurement mode command");
 
     } else {
-      Wire.requestFrom(ADDRESS, 2); // reading 2 bytes ignores the CRC byte
-      raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
-      raw_sensor_value |= Wire.read();      // read the LSB from the sensor
+      // Record the time before the measurements
+      start_time = micros();
+      for(int i = 0; i < 10; ++i) {
+        Wire.requestFrom(ADDRESS, 2); // reading 2 bytes ignores the CRC byte
+        raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
+        raw_sensor_value |= Wire.read();      // read the LSB from the sensor
+      }
 
       // Record the time after the measurement is finished and the result is read
       stop_time = micros();
@@ -177,7 +178,7 @@ void loop() {
         Serial.print(", resolution: ");
         Serial.print(sensor_resolution);
 
-        Serial.print(", duration: ");
+        Serial.print(", duration for 10 measurments: ");
         Serial.print(stop_time - start_time);
         Serial.println(" usec");
       }

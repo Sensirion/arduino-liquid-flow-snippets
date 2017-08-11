@@ -39,21 +39,16 @@
 
 const int ADDRESS = 0x40; // Standard address for Liquid Flow Sensors
 
-const uint16_t ACTIVE_CONFIG_FIELD_SIZE            = 0x300;
 const uint16_t PART_NAME_SIZE                      = 20;
 const uint16_t SERIAL_NUMBER_SIZE                  = 4;
-const uint16_t WRDADR_OFFSET_PART_NAME             = 0x02E8;
-const uint16_t WRDADR_OFFSET_SERIAL_NUMBER_PRODUCT = 0x02F8;
+const uint16_t PART_NAME_ADDRESS                   = 0x02E8;
+const uint16_t SERIAL_NUMBER_ADDRESS               = 0x02F8;
 
 // -----------------------------------------------------------------------------
 // Arduino setup routine, just runs once:
 // -----------------------------------------------------------------------------
 void setup() {
   int ret, i, j, req_size;
-  uint16_t ro_reg_2;
-  uint16_t active_config_field;
-  uint16_t active_config_field_address;
-  uint16_t base_address;
 
   char     part_name[PART_NAME_SIZE + 1];
   uint32_t serial_number_product;
@@ -75,40 +70,12 @@ void setup() {
     }
     delay(50); // wait long enough for reset
 
-    // Read the read only register 2 to get the BOOT TIME active configuration
-    // field
-    Wire.beginTransmission(ADDRESS);
-    Wire.write(0xE9);
-    ret = Wire.endTransmission();
-    if (ret != 0) {
-      Serial.println("Error while setting register read mode");
-      continue;
-    }
-
-    Wire.requestFrom(ADDRESS, 2);
-    ro_reg_2  = Wire.read() << 8;
-    ro_reg_2 |= Wire.read();
-    ret = Wire.endTransmission();
-    if (ret != 0) {
-      Serial.println("Error while reading register settings");
-      continue;
-    }
-
-    // To determine the base EEPROM address for actual sensor information,
-    // bits <2:0> of the Read Only Register 2 (also called active configuration
-    // field at boot time) must be multiplied by ACTIVE_CONFIG_FIELD_SIZE.
-    active_config_field = ro_reg_2 & 0x0007;
-    base_address = active_config_field * ACTIVE_CONFIG_FIELD_SIZE;
-
     // Read out part name
-    active_config_field_address = WRDADR_OFFSET_PART_NAME +
-                                  base_address;
-
     Wire.beginTransmission(ADDRESS);
     Wire.write(0xFA); // Set EEPROM read mode
     // Write left aligned 12 bit EEPROM address
-    Wire.write(active_config_field_address >> 4);
-    Wire.write((active_config_field_address << 12) >> 8);
+    Wire.write(PART_NAME_ADDRESS >> 4);
+    Wire.write((PART_NAME_ADDRESS << 12) >> 8);
     ret = Wire.endTransmission();
     if (ret != 0) {
       Serial.println("Error during write EEPROM address");
@@ -128,14 +95,11 @@ void setup() {
     part_name[j] = '\0';
 
     // Read out serial number
-    active_config_field_address = WRDADR_OFFSET_SERIAL_NUMBER_PRODUCT +
-                                  base_address;
-
     Wire.beginTransmission(ADDRESS);
     Wire.write(0xFA); // Set EEPROM read mode
     // Write left aligned 12 bit EEPROM address
-    Wire.write(active_config_field_address >> 4);
-    Wire.write((active_config_field_address << 12) >> 8);
+    Wire.write(SERIAL_NUMBER_ADDRESS >> 4);
+    Wire.write((SERIAL_NUMBER_ADDRESS << 12) >> 8);
     ret = Wire.endTransmission();
     if (ret != 0) {
       Serial.println("Error during write EEPROM address");
