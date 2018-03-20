@@ -9,10 +9,13 @@ as a starting point for setting up communication with the liquid flow sensors
 through the I2C interface.
 
 ## Compatibility
-The sample snippets are generally compatible with Sensirion's digital flow sensor portfolio.
-More specifically:
+The sample snippets are generally compatible with Sensirion's digital flow
+sensor portfolio. More specifically:
 
 SLG, SLI, SLS, SLQ-QTxxx, LG16-xxxxD, LS32 and LPG10 series sensors.
+
+Exception: Example\_00\_Measurement\_LD20 only works with the LD20 series
+sensors based on Sensirion's SF06 chips.
 
 ## Introduction
 This sample code library is aimed at customers who have successfully set up
@@ -25,15 +28,16 @@ communication with our liquid flow sensors.
 ## Code Examples
 | Number & Name                 | Description                                  |
 |-------------------------------|----------------------------------------------|
-| 01 Simple Measurement         | Reads simple measurement data from the<br>sensor. |
-| 02 Set Resolution             | Reads measurement data from the sensor and<br>changes the resolution. |
-| 03 Read Scale Factor and Unit | Reads the scale factor and measurement unit<br>information from the sensor's EEPROM. |
-| 04 Read Product Details       | Reads the product details (serial number and product name). |
-| 05 CRC Checksum               | Reads flow measurement data from the sensor<br>and calculates the checksum of the<br>communication for error detection. |
-| 10 Calibration Field          | Describes the necessary steps to change the<br>calibration field settings. |
-| 11 Read Temperature Voltage   | Demonstrates how to read temperature and<br>voltage data. |
-| 12 Two's Complement           | Demonstrates how to use the signed datatype<br>interpretation directly and how to calculate<br>the two's complement manually. |
-| 13 DIY Flow Meter             | Expands on example 3 to build a stand-alone<br>flow meter using a graphic LCD. |
+| 00 Simple measurement (LD20 only) | Reads simple measurement data from the<br>LD20 sensor series (SF06 flow chip). |
+| 01 Simple Measurement             | Reads simple measurement data from the<br>sensor. |
+| 02 Set Resolution                 | Reads measurement data from the sensor and<br>changes the resolution. |
+| 03 Read Scale Factor and Unit     | Reads the scale factor and measurement unit<br>information from the sensor's EEPROM. |
+| 04 Read Product Details           | Reads the product details (serial number and product name). |
+| 05 CRC Checksum                   | Reads flow measurement data from the sensor<br>and calculates the checksum of the<br>communication for error detection. |
+| 10 Calibration Field              | Describes the necessary steps to change the<br>calibration field settings. |
+| 11 Read Temperature Voltage       | Demonstrates how to read temperature and<br>voltage data. |
+| 12 Two's Complement               | Demonstrates how to use the signed datatype<br>interpretation directly and how to calculate<br>the two's complement manually. |
+| 13 DIY Flow Meter                 | Expands on example 3 to build a stand-alone<br>flow meter using a graphic LCD. |
 
 ## Prerequisites
 In order to initiate the serial communication, `Serial.begin(9600)` should be
