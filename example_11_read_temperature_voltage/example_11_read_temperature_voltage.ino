@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Sensirion AG
+ * Copyright (c) 2018, Sensirion AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,13 +102,12 @@ void loop() {
     }
 
     Wire.requestFrom(ADDRESS, 2);
-    raw_sensor_value  = Wire.read() << 8;
-    raw_sensor_value |= Wire.read();
-    ret = Wire.endTransmission();
-    if (ret != 0){
+    if (Wire.available() < 2) {
       Serial.println("Error during read");
       continue;
     }
+    raw_sensor_value  = Wire.read() << 8;
+    raw_sensor_value |= Wire.read();
 
     sensor_reading = ((int16_t) raw_sensor_value) / MEASUREMENT_FACTOR[i];
 

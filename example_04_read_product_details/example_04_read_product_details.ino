@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Sensirion AG
+ * Copyright (c) 2018, Sensirion AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,11 @@ void setup() {
 
     req_size = PART_NAME_SIZE / 2 * 3;
     Wire.requestFrom(ADDRESS, req_size);
+    if (Wire.available() < req_size) {
+      Serial.println("Error reading part name");
+      continue;
+    }
+
     for (i = 0, j = 0; i < req_size; ++i) {
         if ((i + 1) % 3 != 0) {
           part_name[j++] = Wire.read();
@@ -144,13 +149,12 @@ void loop() {
   uint16_t raw_sensor_value;
 
   Wire.requestFrom(ADDRESS, 2); // reading 2 bytes ignores the CRC byte
-  raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
-  raw_sensor_value |= Wire.read();      // read the LSB from the sensor
-
-  ret = Wire.endTransmission();
-  if (ret != 0) {
+  if (Wire.available() < 2) {
     Serial.println("Error while reading flow measurement");
+
   } else {
+    raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
+    raw_sensor_value |= Wire.read();      // read the LSB from the sensor
     Serial.print("Sensor reading: ");
     Serial.println((int16_t) raw_sensor_value);
   }

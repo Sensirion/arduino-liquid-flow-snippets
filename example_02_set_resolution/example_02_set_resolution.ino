@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Sensirion AG
+ * Copyright (c) 2018, Sensirion AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,13 +110,12 @@ void loop() {
   } else {
     // Read the content of the adv user register
     Wire.requestFrom(ADDRESS, 2);
-    adv_user_reg_original  = Wire.read() << 8;
-    adv_user_reg_original |= Wire.read();
-    ret = Wire.endTransmission();
-    if (ret != 0) {
+    if (Wire.available() < 2) {
       Serial.println("Error during read register settings");
 
     } else {
+      adv_user_reg_original  = Wire.read() << 8;
+      adv_user_reg_original |= Wire.read();
       adv_user_reg_new = (adv_user_reg_original | 0x0E00) & resolution_mask;
 
       if (VERBOSE_OUTPUT) {
@@ -158,30 +157,28 @@ void loop() {
     } else {
       // Record the time before the measurements
       start_time = micros();
-      for(int i = 0; i < 10; ++i) {
+      for (int i = 0; i < 10; ++i) {
         Wire.requestFrom(ADDRESS, 2); // reading 2 bytes ignores the CRC byte
-        raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
-        raw_sensor_value |= Wire.read();      // read the LSB from the sensor
+        if (Wire.available() < 2) {
+          Serial.println("Error while reading flow measurement");
+        } else {
+          raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
+          raw_sensor_value |= Wire.read();      // read the LSB from the sensor
+        }
       }
 
       // Record the time after the measurement is finished and the result is read
       stop_time = micros();
 
-      ret = Wire.endTransmission();
-      if (ret != 0) {
-        Serial.println("Error while reading flow measurement");
+      Serial.print("Measurement value: ");
+      Serial.print((int16_t) raw_sensor_value);
 
-      } else {
-        Serial.print("Measurement value: ");
-        Serial.print((int16_t) raw_sensor_value);
+      Serial.print(", resolution: ");
+      Serial.print(sensor_resolution);
 
-        Serial.print(", resolution: ");
-        Serial.print(sensor_resolution);
-
-        Serial.print(", duration for 10 measurments: ");
-        Serial.print(stop_time - start_time);
-        Serial.println(" usec");
-      }
+      Serial.print(", duration for 10 measurments: ");
+      Serial.print(stop_time - start_time);
+      Serial.println(" usec");
     }
   }
 

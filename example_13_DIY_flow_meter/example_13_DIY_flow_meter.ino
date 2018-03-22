@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Sensirion AG
+ * Copyright (c) 2018, Sensirion AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,13 +100,12 @@ void setup() {
     }
 
     Wire.requestFrom(ADDRESS, 2);
-    user_reg  = Wire.read() << 8;
-    user_reg |= Wire.read();
-    ret = Wire.endTransmission();
-    if (ret != 0) {
+    if (Wire.available() < 2) {
       Serial.println("Error while reading register settings");
       continue;
     }
+    user_reg  = Wire.read() << 8;
+    user_reg |= Wire.read();
 
     // The active configuration field is determined by bit <6:4>
     // of the User Register
@@ -126,17 +125,16 @@ void setup() {
 
     // Read the scale factor and the adjacent unit
     Wire.requestFrom(ADDRESS, 6);
+    if (Wire.available() < 6) {
+      Serial.println("Error while reading EEPROM");
+      continue;
+    }
     scale_factor = Wire.read() << 8;
     scale_factor|= Wire.read();
     crc1         = Wire.read();
     unit_code    = Wire.read() << 8;
     unit_code   |= Wire.read();
     crc2         = Wire.read();
-    ret = Wire.endTransmission();
-    if (ret != 0) {
-      Serial.println("Error while reading EEPROM");
-      continue;
-    }
 
     switch (unit_code) {
      case 2115:
@@ -198,17 +196,16 @@ void loop() {
   float sensor_reading;
 
   Wire.requestFrom(ADDRESS, 2); // reading 2 bytes ignores the CRC byte
-  raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
-  raw_sensor_value |= Wire.read();      // read the LSB from the sensor
-  ret = Wire.endTransmission();
-  if (ret != 0) {
-        Serial.println("Error while reading flow measurement");
+  if (Wire.available() < 2) {
+    Serial.println("Error while reading flow measurement");
     // Display error on the LCD
     // move the LCD cursor to the second row
     lcd.setCursor(0, 1);
     lcd.print("Error reading flow");
 
   } else {
+    raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
+    raw_sensor_value |= Wire.read();      // read the LSB from the sensor
     sensor_reading = ((int16_t) raw_sensor_value) / ((float) scale_factor);
 
     Serial.print("Sensor reading: ");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Sensirion AG
+ * Copyright (c) 2018, Sensirion AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,14 +87,13 @@ void loop() {
   float sensor_reading;
 
   Wire.requestFrom(ADDRESS, 3); // reading 2 measurement bytes + the CRC byte
-  data[0] = Wire.read(); // read the MSB from the sensor
-  data[1] = Wire.read(); // read the LSB from the sensor
-  crc = Wire.read();
-  ret = Wire.endTransmission();
-  if (ret != 0) {
+  if (Wire.available() < 3) {
     Serial.println("Error while reading flow measurement");
 
   } else {
+    data[0] = Wire.read(); // read the MSB from the sensor
+    data[1] = Wire.read(); // read the LSB from the sensor
+    crc = Wire.read();
     // compute 8bit checksum (takes 16 micro seconds on the arduino uno)
     calc_crc = 0;
     for (b = 0; b < 2; ++b) {

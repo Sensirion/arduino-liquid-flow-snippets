@@ -96,7 +96,8 @@ void loop() {
 
     for(int i = 0; i < 10; ++i) {
       delay(100);
-      if (Wire.requestFrom(ADDRESS, 9) < 9) {
+      Wire.requestFrom(ADDRESS, 9);
+      if (Wire.available() < 9) {
         Serial.println("Error while reading flow measurement");
         continue;
       }

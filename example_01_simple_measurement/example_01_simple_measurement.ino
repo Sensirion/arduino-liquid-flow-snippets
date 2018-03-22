@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Sensirion AG
+ * Copyright (c) 2018, Sensirion AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,12 +79,12 @@ void loop() {
 
   } else {
     Wire.requestFrom(ADDRESS, 2);       // reading 2 bytes ignores the CRC byte
-    raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
-    raw_sensor_value |= Wire.read();      // read the LSB from the sensor
-    ret = Wire.endTransmission();
-    if (ret != 0) {
+    if (Wire.available() < 2) {
       Serial.println("Error while reading flow measurement");
+
     } else {
+      raw_sensor_value  = Wire.read() << 8; // read the MSB from the sensor
+      raw_sensor_value |= Wire.read();      // read the LSB from the sensor
 
       Serial.print("raw value from sensor: ");
       Serial.print(raw_sensor_value);
