@@ -50,11 +50,12 @@ functions:
 | Functions                             | Description
 |---------------------------------------|--------------------------------------|
 | Wire.begin()                          | Join I2C bus (address optional for<br>master). |
-| Wire.beginTransmission(ADDRESS)       | Starts transmission with device at<br>ADDRESS over I2C. |
+| Wire.beginTransmission(ADDRESS)       | Initiate a transmission transaction <br>with the device at ADDRESS<br>over I2C. |
 | Wire.write(value)                     | Queues bytes for transmission from<br>master to slave. |
-| Wire.endTransmission()                | Stops transmission.                  |
-| Wire.requestFrom(ADDRESS, LEN)        | Master requests data (LEN bytes)<br>from slave at ADDRESS. |
-| Wire.read()                           | Read data from the I2C bus.          |
+| Wire.endTransmission()                | Commit the transmission transaction:<br>start, send data, stop. |
+| Wire.requestFrom(ADDRESS, LEN)        | Master requests data (LEN bytes)<br>from slave at ADDRESS and<br>store to buffer. |
+| Wire.available()                      | Retrieve the length of the I2C buffer. |
+| Wire.read()                           | Read data from the I2C buffer.       |
 
 For further details, please refer to Arduino's official
 [Wire Documentation](https://www.arduino.cc/en/Reference/Wire).
