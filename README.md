@@ -9,13 +9,14 @@ as a starting point for setting up communication with the liquid flow sensors
 through the I2C interface.
 
 ## Compatibility
-The sample snippets are generally compatible with Sensirion's digital flow
-sensor portfolio. More specifically:
-
+The code snippets are generally compatible with Sensirion's digital flow
+sensor portfolio. The current portfolio is based on two different sensor chips,
+the SF04 and the SF06.
+More specifically:
+### SF04
 SLG, SLI, SLS, SLQ-QTxxx, LG16-xxxxD, LS32 and LPG10 series sensors.
-
-Exception: Example\_00\_Measurement\_LD20 only works with the LD20 series
-sensors based on Sensirion's SF06 chips.
+### SF06
+LD20 and SLF3x series sensors.
 
 ## Introduction
 This sample code library is aimed at customers who have successfully set up
@@ -26,18 +27,24 @@ Sensirion provides code examples showcasing the most important use cases of I2C
 communication with our liquid flow sensors.
 
 ## Code Examples
-| Number & Name                 | Description                                  |
-|-------------------------------|----------------------------------------------|
-| 00 Simple measurement (LD20 only) | Reads simple measurement data from the<br>LD20 sensor series (SF06 flow chip). |
-| 01 Simple Measurement             | Reads simple measurement data from the<br>sensor. |
-| 02 Set Resolution                 | Reads measurement data from the sensor and<br>changes the resolution. |
-| 03 Read Scale Factor and Unit     | Reads the scale factor and measurement unit<br>information from the sensor's EEPROM. |
-| 04 Read Product Details           | Reads the product details (serial number and product name). |
-| 05 CRC Checksum                   | Reads flow measurement data from the sensor<br>and calculates the checksum of the<br>communication for error detection. |
-| 10 Calibration Field              | Describes the necessary steps to change the<br>calibration field settings. |
-| 11 Read Temperature Voltage       | Demonstrates how to read temperature and<br>voltage data. |
-| 12 Two's Complement               | Demonstrates how to use the signed datatype<br>interpretation directly and how to calculate<br>the two's complement manually. |
-| 13 DIY Flow Meter                 | Expands on example 3 to build a stand-alone<br>flow meter using a graphic LCD. |
+### SF04
+|Folder| Number & Name                 | Description                                  |
+|-----------|-------------------------------|----------------------------------------------|
+|SF04       | 01 Simple Measurement             | Reads simple measurement data from the<br>sensor. |
+|SF04       | 02 Set Resolution                 | Reads measurement data from the sensor and<br>changes the resolution. |
+|SF04       | 03 Read Scale Factor and Unit     | Reads the scale factor and measurement unit<br>information from the sensor's EEPROM. |
+|SF04       | 04 Read Product Details           | Reads the product details (serial number and product name). |
+|SF04       | 05 CRC Checksum                   | Reads flow measurement data from the sensor<br>and calculates the checksum of the<br>communication for error detection. |
+|SF04       | 10 Calibration Field              | Describes the necessary steps to change the<br>calibration field settings. |
+|SF04       | 11 Read Temperature Voltage       | Demonstrates how to read temperature and<br>voltage data. |
+|SF04       | 12 Two's Complement               | Demonstrates how to use the signed datatype<br>interpretation directly and how to calculate<br>the two's complement manually. |
+|SF04       | 13 DIY Flow Meter                 | Expands on example 3 to build a stand-alone<br>flow meter using a graphic LCD. |
+
+### SF06
+|Folder| Number & Name                 | Description                                  |
+|-----------|-------------------------------|----------------------------------------------|
+|SF06       | 14 Simple measurement (LD20-2600B) | Reads simple measurement data from the<br>LD20-2600B. |
+|SF06       | 15 Simple measurement (SLF3S-1300F) | Reads simple measurement data from the<br>SLF3S-1300F and highlights where<br>changes have to be made for other SF06<br>sensors. |
 
 ## Prerequisites
 In order to initiate the serial communication, `Serial.begin(9600)` should be
@@ -60,7 +67,7 @@ functions:
 For further details, please refer to Arduino's official
 [Wire Documentation](https://www.arduino.cc/en/Reference/Wire).
 
-## Sensor Commands
+## SF04 Sensor Commands
 The following table shows the commands that are typically used for I2C
 communication. The commands need to be transmitted through the
 `Wire.write(Value)` function that is part of Arduino's Wire library for I2C
@@ -73,11 +80,16 @@ communication.
 | ADV\_USER\_REG\_W         | 0xE4  | Write advanced user register  | 2        |
 | ADV\_USER\_REG\_R         | 0xE5  | Read advanced user register   | 2        |
 | READ\_ONLY\_REG2\_R       | 0xE9  | Read-only register 2          | 4        |
-| TRIGGER\_FLOW\_MEASUREMENT| 0xF1  | Trigger a flow measurement    | All      |
+| TRIGGER\_FLOW\_MEASUREMENT| 0xF1  | Trigger a flow measurement    | 1-13     |
 | TRIGGER\_TEMP\_MEASUREMENT| 0xF3  | Trigger a temperature measurement | 11   |
 | TRIGGER\_VDD\_MEASUREMENT | 0xF5  | Trigger a supply voltage measurement | 11|
 | EEPROM\_R                 | 0xFA  | Read EEPROM                   | 3, 4, 13 |
-| SOFT\_RESET               | 0xFE  | Soft reset                    | All      |
+| SOFT\_RESET               | 0xFE  | Soft reset                    | 1-13     |
+
+## SF06 Sensor Commands
+SF06 based sensors have a simplified I2C interface. The measurement commands are
+calibration specific and therefore depend on the respective sensor. The
+available commands are listed in the sensors' datasheets.
 
 ## Two's Complement
 The two's complement is a binary number representation. This notation is widely
@@ -93,4 +105,3 @@ Note that all negative numbers will thus carry a 1 in their highest bit.
 1. binary representation of absolute value: b = bin(abs(-5)) -> 0000 0101
 2. invert: b = xor(b, 1111 1111) -> 1111 1010
 3. Increment by one: b = b + 1 -> 1111 1011
-
