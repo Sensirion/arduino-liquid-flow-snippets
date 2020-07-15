@@ -28,25 +28,30 @@ communication with our liquid flow sensors.
 
 ## Code Examples
 ### SF04
-|Folder| Number & Name                 | Description                                  |
-|-----------|-------------------------------|----------------------------------------------|
-|SF04       | 01 Simple Measurement             | Reads simple measurement data from the<br>sensor. |
-|SF04       | 02 Set Resolution                 | Reads measurement data from the sensor and<br>changes the resolution. |
-|SF04       | 03 Read Scale Factor and Unit     | Reads the scale factor and measurement unit<br>information from the sensor's EEPROM. |
-|SF04       | 04 Read Product Details           | Reads the product details (serial number and product name). |
-|SF04       | 05 CRC Checksum                   | Reads flow measurement data from the sensor<br>and calculates the checksum of the<br>communication for error detection. |
-|SF04       | 10 Calibration Field              | Describes the necessary steps to change the<br>calibration field settings. |
-|SF04       | 11 Read Temperature Voltage       | Demonstrates how to read temperature and<br>voltage data. |
-|SF04       | 12 Two's Complement               | Demonstrates how to use the signed datatype<br>interpretation directly and how to calculate<br>the two's complement manually. |
-|SF04       | 13 DIY Flow Meter                 | Expands on example 3 to build a stand-alone<br>flow meter using a graphic LCD. |
+|Folder | Number & Name                  | Description                                  |
+|-------|--------------------------------|----------------------------------------------|
+|SF04   | 01 Simple Measurement          | Reads simple measurement data from the<br>sensor. |
+|SF04   | 02 Set Resolution              | Reads measurement data from the sensor and<br>changes the resolution. |
+|SF04   | 03 Read Scale Factor and Unit  | Reads the scale factor and measurement unit<br>information from the sensor's EEPROM. |
+|SF04   | 04 Read Product Details        | Reads the product details (serial number and product name). |
+|SF04   | 05 CRC Checksum                | Reads flow measurement data from the sensor<br>and calculates the checksum of the<br>communication for error detection. |
+|SF04   | 10 Calibration Field           | Describes the necessary steps to change the<br>calibration field settings. |
+|SF04   | 11 Read Temperature Voltage    | Demonstrates how to read temperature and<br>voltage data. |
+|SF04   | 12 Two's Complement            | Demonstrates how to use the signed datatype<br>interpretation directly and how to calculate<br>the two's complement manually. |
+|SF04   | 13 DIY Flow Meter              | Expands on example 3 to build a stand-alone<br>flow meter using a graphic LCD. |
 
 ### SF06
-|Folder| Number & Name                 | Description                                  |
-|-----------|-------------------------------|----------------------------------------------|
-|SF06       | 14 Simple measurement (LD20-2600B) | Reads simple measurement data from the<br>LD20-2600B. |
-|SF06       | 15 Simple measurement (SLF3S-1300F) | Reads simple measurement data from the<br>SLF3S-1300F and highlights where<br>changes have to be made for other SF06<br>sensors. |
+|Folder | Number & Name                 | Description                                  |
+|-------|-------------------------------|----------------------------------------------|
+|SF06   | 14 Simple measurement (LD20-2600B) | Reads simple measurement data from the<br>LD20-2600B. |
+|SF06   | 15 Simple measurement (SLF3S-1300F) | Reads simple measurement data from the<br>SLF3S-1300F and highlights where<br>changes have to be made for other SF06<br>sensors. |
+|SF06   | 16 CANBUS receive | Demonstrates how to forward measurement data over CANBUS.<br>This is useful for some test setups. |
+|SF06   | 17 CANBUS send | Demonstrates how to forward measurement data over CANBUS.<br>This is useful for some test setups. |
+|SF06   | 18 DIY closed loop volume controller | Demonstrates how an SLF3x can be used<br>together with a pump to dispense a controlled volume. |
+|SF06   | 19 DIY flow meter | Stand-alone flow meter using a praphic LCD (SF06 sensors). |
+|SF06   | 20 simple measurement multiple SLF3x | Demonstrates how to use an I2C multiplexer<br>(TCA9548A) to communicate with up to 8<br>SLF3x sensors on the same bus.  |
 
-## Prerequisites
+## Prereqites
 In order to initiate the serial communication, `Serial.begin(9600)` should be
 used to set the baud rate to 9600. The code examples require the use of the
 "Wire"-library. This Arduino library contains all the relevant functions for
