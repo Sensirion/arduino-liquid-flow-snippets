@@ -21,7 +21,7 @@ LD20 and SLF3x series sensors.
 ## Introduction
 This sample code library is aimed at customers who have successfully set up
 their Arduino and connected their Sensirion liquid flow sensor. Please see the
-[Arduino Quick Start Guide](https://developer.sensirion.com/platforms/arduino/arduino-interface-for-liquid-flow-sensors/)
+[Arduino Quick Start Guide](https://developer.sensirion.com/tutorials/arduino-interface-for-liquid-flow-sensors/)
 for help in setting up your Arduino and liquid flow sensor.
 Sensirion provides code examples showcasing the most important use cases of I2C
 communication with our liquid flow sensors.
