@@ -51,7 +51,7 @@ communication with our liquid flow sensors.
 |SF06   | 19 DIY flow meter | Stand-alone flow meter using a praphic LCD (SF06 sensors). |
 |SF06   | 20 simple measurement multiple SLF3x | Demonstrates how to use an I2C multiplexer<br>(TCA9548A) to communicate with up to 8<br>SLF3x sensors on the same bus.  |
 
-## Prereqites
+## Prerequisites
 In order to initiate the serial communication, `Serial.begin(9600)` should be
 used to set the baud rate to 9600. The code examples require the use of the
 "Wire"-library. This Arduino library contains all the relevant functions for
